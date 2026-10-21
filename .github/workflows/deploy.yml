@@ -3,6 +3,7 @@ name: Desplegar en GitHub Pages
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,21 +24,23 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: npm
 
-      - name: Instalar dependencias con npm clean-install o install
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+      - name: Instalar dependencias reproducibles
+        run: npm ci
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Verificar motor y objetivos de aprendizaje
+        run: npm test
 
       - name: Construir aplicación (Build)
         run: npm run build
 
       - name: Subir artefacto para GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist
 
